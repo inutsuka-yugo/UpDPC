@@ -1,0 +1,15 @@
+numpy
+scipy
+pandas
+matplotlib
+tqdm
+tifffile
+opencv-python
+natsort
+lmfit
+ipykernel
+ipywidgets
+pillow
+emcee          # Optional, for lmfit methods.
+pycromanager   # Only for microscope PC
+docstring-inheritance	# Only for microscope PC
