@@ -135,17 +135,44 @@ In the original paper, we evaluated the spatial resolution and quantification by
 
 If you use this repository in your research, please cite our paper:
 
-> Yugo Inutsuka, Koki Yamamoto, Masafumi Kuroda, Yasushi Okada, "[Paper Title]," bioRxiv, 2024, DOI: [DOI link]
+> Yugo Inutsuka, Koki Yamamoto, Masafumi Kuroda, Yasushi Okada, "Single-shot label-free nanoscopy for quantitative organelle visualization on standard commercial microscopes," bioRxiv, 2025, DOI: [https://doi.org/10.1101/2024.12.31.630894](https://doi.org/10.1101/2024.12.31.630894)
 
-Alternatively, you can use the citation information provided in `CITATION.txt`.
-
-<!--
 For BibTeX users:
 
 ```bibtex
-@article{
+@misc{inutsuka_single-shot_2025,
+	title = {Single-shot label-free nanoscopy for quantitative organelle visualization on standard commercial microscopes},
+	copyright = {© 2025, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-NonCommercial-NoDerivs 4.0 International), CC BY-NC-ND 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/},
+	url = {https://www.biorxiv.org/content/10.1101/2024.12.31.630894v1},
+	doi = {10.1101/2024.12.31.630894},
+	language = {en},
+	urldate = {2025-01-02},
+	publisher = {bioRxiv},
+	author = {Inutsuka, Yugo and Yamamoto, Koki and Kuroda, Masafumi and Okada, Yasushi},
+	month = jan,
+	year = {2025},
+	note = {Pages: 2024.12.31.630894
+Section: New Results},
+   }
+```
+
+For BibLaTeX users:
+
+```biblatex
+@misc{inutsuka_single-shot_2025,
+	title = {Single-shot label-free nanoscopy for quantitative organelle visualization on standard commercial microscopes},
+	rights = {© 2025, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-{NonCommercial}-{NoDerivs} 4.0 International), {CC} {BY}-{NC}-{ND} 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/},
+	url = {https://www.biorxiv.org/content/10.1101/2024.12.31.630894v1},
+	doi = {10.1101/2024.12.31.630894},
+	publisher = {{bioRxiv}},
+	author = {Inutsuka, Yugo and Yamamoto, Koki and Kuroda, Masafumi and Okada, Yasushi},
+	urldate = {2025-01-02},
+	date = {2025-01-02},
+	langid = {english},
+	note = {Pages: 2024.12.31.630894
+Section: New Results},
 }
-``` -->
+```
 
 ## License
 
