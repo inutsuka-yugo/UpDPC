@@ -1,6 +1,6 @@
 # UpDPC
 
-This repository contains Python code for simulating Upgraded polarization-resolved differential phase contrast (UpDPC) microscopy, microscope implementation, and subsequent analysis.
+This repository contains Python code for simulating Upgraded polarization-resolved differential phase contrast (UpDPC) microscopy, microscope implementation, and subsequent analysis, proposed in the paper: [Single-shot label-free nanoscopy for quantitative organelle visualization on standard commercial microscopes](https://doi.org/10.1101/2024.12.31.630894).
 
 The phase retrieval codes are written to be compatible with [the Waller lab's DPC codes][1].
 
