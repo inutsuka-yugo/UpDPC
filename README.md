@@ -11,6 +11,7 @@ The phase retrieval codes are written to be compatible with [the Waller lab's DP
 - [UpDPC](#updpc)
   - [Table of Contents](#table-of-contents)
   - [Repository Structure](#repository-structure)
+  - [Requirements](#requirements)
   - [Installation](#installation)
     - [Option 1: Using miniconda (Recommended)](#option-1-using-miniconda-recommended)
     - [Option 2: Using pip](#option-2-using-pip)
@@ -43,6 +44,19 @@ The repository has the following structure:
 │
 └─ updpc                             # Main Python scripts for the UpDPC algorithm
 ```
+
+## Requirements
+
+Before proceeding with installation, ensure you have the following:
+
+1. **Git**
+
+   - Required for cloning this repository.
+   - Download and install Git from: [https://git-scm.com/downloads](https://git-scm.com/downloads)
+
+2. **Python Environment**
+   - You need Python **3.x** installed.
+   - You can use either **miniconda** or **pip**
 
 ## Installation
 
