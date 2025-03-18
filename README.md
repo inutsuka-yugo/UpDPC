@@ -119,9 +119,11 @@ To run this, you must set up the SDK for Python as follows:
 
 1. Download the ThorCam software from [ThorCam website](https://www.thorlabs.co.jp/software_pages/ViewSoftwarePage.cfm?Code=ThorCam).
 2. Unzip `C:\Program Files\Thorlabs\Scientific Imaging\Scientific Camera Support\Scientific_Camera_Interfaces.zip`.
-3. Follow the `Python README.txt` in the unzipped folder to set up the software.
+3. Follow the `Python README.txt` in the unzipped folder to set up the software, such as copying DLL files.
 4. Copy and paste the `SDK\Python Toolkit` folder from the extracted folder into the `updpc` folder of the cloned repository.
-5. Rename the pasted `Python Toolkit` folder to the `thorcam` folder.
+5. Unzip `thorlabs_tsi_camera_python_sdk_package.zip`.
+6. Copy and paste the `thorlabs_tsi_sdk` folder from the extracted folder into the `examples` folder.
+7. Rename the pasted `Python Toolkit` folder to the `thorcam` folder.
 
 <!-- 例として、Windows PC と Thorlabs 製の偏光カメラである CS505MUP1 や CS505MUP1 を使って UpDPC を使用する場合の Python コードも付属している。
 実行する場合は、以下の手順で Python 用の SDK をセットアップする必要がある。
