@@ -48,8 +48,7 @@ def imwrite(
 ):
     """
     Write an image to a TIFF file for ImageJ compatibility.
-    By default, the axes metadata is set based on the number of dimensions of the input image:
-     "YX" for 2D, "TYX" for 3D, and "TZYX" for 4D.
+    By default, the axes metadata is set based on the number of dimensions of the input image: "YX" for 2D, "TYX" for 3D, and "TZYX" for 4D.
 
     Parameters
     ----------
@@ -122,6 +121,22 @@ def imwrite_uint8(path, img, **kwargs):
         Additional keyword arguments to pass to tifffile.imwrite.
     """
     imwrite(path, np.array(img, dtype=np.uint8), imagej=True, **kwargs)
+
+
+def imwrite_int16(path, img, **kwargs):
+    """
+    Write an image to a TIFF file as a 16-bit integer numpy array.
+
+    Parameters
+    ----------
+    path : str
+        The path to save the TIFF file.
+    img : numpy.ndarray
+        The image data to save.
+    kwargs : dict
+        Additional keyword arguments to pass to tifffile.imwrite.
+    """
+    imwrite(path, np.array(img, dtype=np.int16), imagej=True, **kwargs)
 
 
 def cb(var=""):
@@ -198,15 +213,23 @@ def ax_imshow(ax, img, clabel="", cmap="gray", cbar=True, title=None, **kwargs):
     title : str, optional
         The title to display above the image. Default is None.
     """
+    print("ax_imshow is deprecated. Use imshow(ax=ax) instead.")
     plot = ax.imshow(img, cmap=cmap, **kwargs)
     if cbar:
-        axcb(ax, plot)
+        axcb(ax, plot, clabel)
     if title is not None:
         ax.set_title(title)
 
 
 def imshow(
-    img, figsize=(10, 10), title="", clabel="", cmap="gray", cbar=True, **kwargs
+    img,
+    figsize=(10, 10),
+    title="",
+    clabel="",
+    cmap="gray",
+    cbar=True,
+    ax=None,
+    **kwargs,
 ):
     """
     Display an image using matplotlib with clear colorbar and title.
@@ -225,19 +248,25 @@ def imshow(
         The colormap to use for displaying the image. Default is "gray".
     cbar : bool, optional
         Whether to display a colorbar. Default is True.
+    ax : matplotlib.axes.Axes, optional
+        The axes to display the image on. Default is None.
 
     Returns
     -------
     matplotlib.axes.Axes
         The axes object used to display the image.
     """
-    fig, ax = plt.subplots(figsize=figsize)
-    ax_imshow(ax, img, clabel, cmap, cbar, **kwargs)
-    ax.set_title(title)
+    if ax is None:
+        _, ax = plt.subplots(figsize=figsize)
+    plot = ax.imshow(img, cmap=cmap, **kwargs)
+    if cbar:
+        axcb(ax, plot, clabel)
+    if title is not None:
+        ax.set_title(title)
     return ax
 
 
-def imimshow(img, figsize=(20, 10), cmap="gray", title="", **kwargs):
+def imimshow(img, figsize=(15, 4), cmap="gray", title="", **kwargs):
     """
     Display an image with real, imaginary, and absolute parts side by side.
 
@@ -254,19 +283,19 @@ def imimshow(img, figsize=(20, 10), cmap="gray", title="", **kwargs):
     """
     fig, axes = plt.subplots(1, 3, figsize=figsize)
     ax = axes[0]
-    ax_imshow(ax, img.real, cmap=cmap)
+    imshow(img.real, cmap=cmap, ax=ax)
     ax.set_title("real")
     ax.set_aspect(1)
     ax = axes[1]
-    ax_imshow(ax, img.imag, cmap=cmap)
+    imshow(img.imag, cmap=cmap, ax=ax)
     ax.set_title("imag")
     ax.set_aspect(1)
     ax = axes[2]
-    ax_imshow(ax, np.abs(img), cmap=cmap)
+    imshow(np.abs(img), cmap=cmap, ax=ax)
     ax.set_title("abs")
     ax.set_aspect(1)
-    fig.suptitle(title)
     plt.tight_layout()
+    fig.suptitle(title)
 
 
 def hexbin(x, y, gridsize=50, cmap="Reds", ax=None, **kwargs):
@@ -377,8 +406,7 @@ def auto_contrast(img, ignore_percent=2, return_int=False):
     """
     Adjust the contrast of an image automatically.
     The contrast is adjusted by rescaling the intensity values to the range [0, 255].
-    The minimum and maximum intensity values are computed by ignoring `ignore_percent` of the pixels
-     in the bottom and top of the intensity distribution.
+    The minimum and maximum intensity values are computed by ignoring `ignore_percent` of the pixel in the bottom and top of the intensity distribution.
     By default, the output image is returned as a floating-point numpy array.
 
     Parameters
@@ -403,6 +431,29 @@ def auto_contrast(img, ignore_percent=2, return_int=False):
     ret = ret * 255 / np.percentile(ret, 100 - ignore_percent)
     ret = np.clip(ret, 0, 255)
     return ret.astype(np.uint8) if return_int else ret
+
+
+def auto_contrast_nsigma(img, nsigma=2):
+    """
+    Adjust the contrast of an image automatically.
+    The minimum and maximum intensity values are computed by ignoring the values that are more than `nsigma` standard deviations away from the mean.
+
+    Parameters
+    ----------
+    img: numpy.ndarray
+        The input image to adjust the contrast of.
+    nsigma: float, optional
+        The number of standard deviations to consider as outliers.
+        Default is 2.
+
+    Returns
+    -------
+    numpy.ndarray
+        The adjusted image clipped to the range [mean - nsigma * std, mean + nsigma * std].
+    """
+    mean = img.mean()
+    std = img.std()
+    return np.clip(img, mean - nsigma * std, mean + nsigma * std)
 
 
 def auto_contrast_by_values(img, base, ratio, return_int=False):

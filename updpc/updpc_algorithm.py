@@ -143,8 +143,6 @@ class UpDPCSolver:
         The numerical aperture of the cosine function length scale.
     w_in : float
         The half width of the rectangular mask blocking the beam between the adjacent polarizers in NA unit.
-    a0 : float
-        The average transmission of the UpDPC images.
     fxlin : np.ndarray
         The 1D spatial frequency coordinate in the horizontal direction.
     fylin : np.ndarray
@@ -203,7 +201,8 @@ class UpDPCSolver:
         na_ill=None,
         na_cos=np.inf,
         w_in=0,
-        a0=1,
+        *args,
+        **kwargs,
     ):
         """
         Initialize system parameters and functions for UpDPC phase microscopy.
@@ -229,8 +228,6 @@ class UpDPCSolver:
             The numerical aperture of the cosine function length scale. The default is np.inf.
         w_in : float, optional
             The half width of the rectangular mask blocking the beam between the adjacent polarizers in NA unit. The default is 0.
-        a0 : float, optional
-            The average transmission of the UpDPC images. The default is 1.
 
         Raises
         ------
@@ -249,14 +246,23 @@ class UpDPCSolver:
             self.na_ill = na_ill
         self.na_cos = na_cos
         self.w_in = w_in
-        self.a0 = a0
+        if args:
+            print("#" * 10, "Unused args", "#" * 10)
+            for arg in args:
+                print(arg)
+            print("#" * 33)
+        if kwargs:
+            print("#" * 10, "Unused kwargs", "#" * 10)
+            for key, value in kwargs.items():
+                print(key, ":", value)
+            print("#" * 35)
         self.fxlin = ifftshift(
             genGrid(dpc_imgs.shape[-1], 1.0 / dpc_imgs.shape[-1] / self.pixel_size)
         )
         self.fylin = ifftshift(
             genGrid(dpc_imgs.shape[-2], 1.0 / dpc_imgs.shape[-2] / self.pixel_size)
         )
-        self.dpc_num = len(dpc_imgs)
+        self.dpc_num = len(QUADLIST_POL_DEGREES)
         self.normalization()
         self.pupil = pupilGen(self.fxlin, self.fylin, self.wavelength, self.na)
         self.sourceGen()
@@ -269,9 +275,13 @@ class UpDPCSolver:
         Parameters
         ----------
         reg_u : float, optional
-            The regularization parameter for absorption. The default is 1e-2.
+            The regularization parameter for absorption.
+            This corresponds to the prior knowledge of (Variance of Normalized Image) / (Variance of Absorption), where normalized image is the image divided by the zero-order light intensity.
+            The default is 1e-2.
         reg_p : float, optional
-            The regularization parameter for phase. The default is 1e-2.
+            The regularization parameter for phase.
+            This corresponds to the prior knowledge of (Variance of Normalized Image) / (Variance of Phase shift), where normalized image is the image divided by the zero-order light intensity.
+            The default is 1e-2.
         """
         # Tikhonov regularization parameters
         self.reg_u = reg_u
@@ -287,7 +297,6 @@ class UpDPCSolver:
             # img /= meanIntensity  # normalize intensity with DC term
             img /= img.mean()  # normalize intensity with DC term
             img -= 1.0  # subtract the DC term
-            img *= self.a0
 
     def sourceGen(self):
         """
@@ -320,9 +329,9 @@ class UpDPCSolver:
         self.Hu = []
         self.Hp = []
         for source_i in self.source:
-            FSP_cFP = F(source_i * self.pupil) * F(self.pupil).conj()
+            FSP_cFP = F(source_i * self.pupil) * F(self.pupil).conj()  # F[WOTF^*(-u)]
             I0 = (source_i * self.pupil * self.pupil.conj()).sum()
-            self.Hu.append(2.0 * IF(FSP_cFP.real) / I0)
+            self.Hu.append(-2.0 * IF(FSP_cFP.real) / I0)
             self.Hp.append(-2.0 * IF(FSP_cFP.imag) / I0)
             # self.Hp.append(2.0j * IF(1j * FSP_cFP.imag) / I0)
         self.Hu = np.asarray(self.Hu)
@@ -347,7 +356,7 @@ class UpDPCSolver:
         absorption = IF((AHA[3] * AHy[0] - AHA[1] * AHy[1]) / determinant).real
         phase = IF((AHA[0] * AHy[1] - AHA[2] * AHy[0]) / determinant).real
 
-        return absorption + 1.0j * phase
+        return -absorption + 1.0j * phase
 
     def solve(self, return_residual=False, dpc_imgs=None):
         """
@@ -437,7 +446,7 @@ class UpDPCSolver:
         figsize : tuple of int, optional
             The size of the figure. The default is (20, 8).
         kwargs : dict
-            Additional arguments for ax_imshow.
+            Additional arguments for imshow.
         """
         _, axes = plt.subplots(
             1, self.dpc_num, sharex=True, sharey=True, figsize=figsize
@@ -445,7 +454,7 @@ class UpDPCSolver:
         if self.dpc_num == 1:
             axes = [axes]
         for ax, image in zip(axes, self.dpc_imgs):
-            ax_imshow(ax, image, **kwargs)
+            imshow(image, ax=ax, **kwargs)
         plt.show()
 
     def prepare_plot(self):
@@ -458,7 +467,7 @@ class UpDPCSolver:
         self.na_lambda_pix_x = int(self.na / self.wavelength / fx_pix) + 1
         self.na_lambda_pix_y = int(self.na / self.wavelength / fy_pix) + 1
 
-    def plot_source(self, figsize=(20, 8), **kwargs):
+    def plot_source(self, figsize=(20, 8), save_path=None, **kwargs):
         """
         Plot the UpDPC source patterns.
 
@@ -466,8 +475,10 @@ class UpDPCSolver:
         ----------
         figsize : tuple of int, optional
             The size of the figure. The default is (20, 8).
+        save_path : str, optional
+            The path to save the figure. The default is None. If None, the figure won't be saved.
         kwargs : dict
-            Additional arguments for ax_imshow.
+            Additional arguments for imshow.
         """
         self.prepare_plot()
         _, axes = plt.subplots(
@@ -476,8 +487,7 @@ class UpDPCSolver:
         if self.dpc_num == 1:
             axes = [axes]
         for ax, source in zip(axes, self.source):
-            ax_imshow(
-                ax,
+            imshow(
                 fftshift(source)[
                     self.pixel_y // 2
                     - self.na_lambda_pix_y : self.pixel_y // 2
@@ -486,10 +496,13 @@ class UpDPCSolver:
                     - self.na_lambda_pix_x : self.pixel_x // 2
                     + self.na_lambda_pix_x,
                 ],
+                ax=ax,
                 **kwargs,
             )
             ax.axis("off")
             ax.set_aspect(self.na_lambda_pix_x / self.na_lambda_pix_y)
+        if save_path is not None:
+            plt.savefig(save_path, bbox_inches="tight")
         plt.show()
 
     def plot_pupil(self, figsize=(5, 8), **kwargs):
@@ -501,15 +514,14 @@ class UpDPCSolver:
         figsize : tuple of int, optional
             The size of the figure. The default is (5, 8).
         kwargs : dict
-            Additional arguments for ax_imshow.
+            Additional arguments for imshow.
         """
         self.prepare_plot()
         if np.iscomplexobj(self.pupil):
             _, axes = plt.subplots(1, 2, sharex=True, sharey=True, figsize=figsize)
             # Real
             ax = axes[0]
-            ax_imshow(
-                ax,
+            imshow(
                 fftshift(self.pupil.real)[
                     self.pixel_y // 2
                     - self.na_lambda_pix_y : self.pixel_y // 2
@@ -518,6 +530,7 @@ class UpDPCSolver:
                     - self.na_lambda_pix_x : self.pixel_x // 2
                     + self.na_lambda_pix_x,
                 ],
+                ax=ax,
                 **kwargs,
             )
             ax.axis("off")
@@ -525,8 +538,7 @@ class UpDPCSolver:
             ax.set_title("Real")
             # Imaginary
             ax = axes[1]
-            ax_imshow(
-                ax,
+            imshow(
                 fftshift(self.pupil.imag)[
                     self.pixel_y // 2
                     - self.na_lambda_pix_y : self.pixel_y // 2
@@ -535,6 +547,7 @@ class UpDPCSolver:
                     - self.na_lambda_pix_x : self.pixel_x // 2
                     + self.na_lambda_pix_x,
                 ],
+                ax=ax,
                 **kwargs,
             )
             ax.axis("off")
@@ -543,8 +556,7 @@ class UpDPCSolver:
             plt.show()
         else:
             _, ax = plt.subplots(1, 1, sharex=True, sharey=True, figsize=figsize)
-            ax_imshow(
-                ax,
+            imshow(
                 fftshift(self.pupil)[
                     self.pixel_y // 2
                     - self.na_lambda_pix_y : self.pixel_y // 2
@@ -553,6 +565,7 @@ class UpDPCSolver:
                     - self.na_lambda_pix_x : self.pixel_x // 2
                     + self.na_lambda_pix_x,
                 ],
+                ax=ax,
                 **kwargs,
             )
             ax.axis("off")
@@ -591,7 +604,7 @@ class UpDPCSolver:
             cax = divider.append_axes("right", size="5%", pad=0.05)
             if plot_row == 0:
                 plot = ax[plot_row, plot_col].imshow(
-                    fftshift(self.Hu[plot_col].real)[
+                    -fftshift(self.Hu[plot_col].real)[
                         self.pixel_y // 2
                         - self.na_lambda_pix_y : self.pixel_y // 2
                         + self.na_lambda_pix_y,
@@ -604,7 +617,8 @@ class UpDPCSolver:
                     #  clim=[-2., 2.]
                 )
                 ax[plot_row, plot_col].set_title(
-                    r"Re[$H_{\mathrm{A}}$]" + f" for Source {plot_col+1}"
+                    r"$-$Re$\left(H_{\mathrm{abs}}\right)$"
+                    + f" for Source {plot_col+1}"
                 )
                 plt.colorbar(
                     plot,
@@ -626,7 +640,7 @@ class UpDPCSolver:
                     #  clim=[-.8, .8]
                 )
                 ax[plot_row, plot_col].set_title(
-                    r"Im[$H_{\mathrm{P}}$]" + f" for Source {plot_col+1}"
+                    r"Im$\left(H_{\mathrm{ph}}\right)$" + f" for Source {plot_col+1}"
                 )
                 plt.colorbar(
                     plot,
@@ -655,15 +669,12 @@ class UpDPCSolver:
         np.ndarray
             The UpDPC image intensity.
         """
-        Is = (
-            self.a0**2
-            * np.array(
-                [
-                    Hu_i[0, 0] / 2 + (IF(Hu_i * F(absorption) + Hp_i * F(phase)))
-                    for Hu_i, Hp_i in zip(self.Hu, self.Hp)
-                ]
-            ).real
-        )
+        Is = np.array(
+            [
+                -Hu_i[0, 0] / 2 + (IF(Hu_i * F(absorption) + Hp_i * F(phase)))
+                for Hu_i, Hp_i in zip(self.Hu, self.Hp)
+            ]
+        ).real
         return Is
 
     def I_from_phase_abs(self, phase, absorption):
