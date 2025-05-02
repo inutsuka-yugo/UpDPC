@@ -43,6 +43,7 @@ The repository has the following structure:
 │  └─ Siemens_star_analysis          # Code computing MTF from simulated and experimental Siemens star images
 │
 └─ updpc                             # Main Python scripts for the UpDPC algorithm
+   └─ thorcam (put separately)       # ThorCam SDK to control Thorlabs camera
 ```
 
 ## Requirements
