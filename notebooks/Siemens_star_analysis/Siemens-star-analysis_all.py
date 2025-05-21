@@ -37,7 +37,7 @@ if __name__ == "__main__":
                 print("condition:", condition, "is not a valid directory.")
                 line_breaks(5)
                 continue
-            for img_dir in list_folder(join(root_dir, condition))[::1]:
+            for img_dir in list_folders(join(root_dir, condition))[::1]:
                 try:
                     wavelength = (
                         float(basename(img_dir).split("nm")[0].split("_")[-1]) / 1000

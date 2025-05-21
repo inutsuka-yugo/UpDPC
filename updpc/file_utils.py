@@ -143,7 +143,7 @@ def list_tifs(dir_path, include=None, exclude=None, **kwargs):
     )
 
 
-def list_folder(dir_path):
+def list_folders(dir_path):
     """
     List folders in a directory.
     The folders are sorted in natural order.
