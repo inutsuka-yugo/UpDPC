@@ -3,27 +3,20 @@ try:
 
     configure_path()
 
-    from .thorcam.examples.thorlabs_tsi_sdk.tl_camera import (
-        Frame,
-        TLCamera,
-        TLCameraSDK,
+    from .thorcam.examples.thorlabs_tsi_sdk.tl_camera import TLCameraSDK
+except ModuleNotFoundError as e:
+    print(e)
+    raise ModuleNotFoundError(
+        "***Message from the author*** Please set up the ThorCam SDK for Python referring to the README.md file."
     )
-    from .thorcam.examples.thorlabs_tsi_sdk.tl_camera_enums import SENSOR_TYPE
-    from .thorcam.examples.thorlabs_tsi_sdk.tl_polarization_processor import (
-        PolarizationProcessorSDK,
-    )
-except ModuleNotFoundError:
-    pass
-    # raise ModuleNotFoundError(
-    #     "***Message from the author*** Please set up the ThorCam SDK for Python referring to the README.md file."
-    # )
 except Exception as e:
     raise e
 
+import datetime
 import queue
 import threading
 import tkinter as tk
-from datetime import datetime
+
 import pandas as pd
 from PIL import Image, ImageTk
 
@@ -34,7 +27,7 @@ THORCAM_TIMESTAMP_FORMAT = "%Y-%m-%dT%H-%M-%S.%f"
 
 
 def thorcam_now():
-    return datetime.now().strftime(THORCAM_TIMESTAMP_FORMAT)
+    return datetime.datetime.now().strftime(THORCAM_TIMESTAMP_FORMAT)
 
 
 pytsi_tag_names = {
@@ -276,6 +269,8 @@ def makeCanvas(func):
             self._image_width = 0
             self._image_height = 0
             tk.Canvas.__init__(self, parent)
+            self.label_info = tk.Label(parent, text="Brightness")
+            self.label_info.pack()
             self.pack()
             self._get_image()
 
@@ -292,6 +287,13 @@ def makeCanvas(func):
                     self._image_height = height
                     self.config(width=width, height=height)
                 self.create_image(0, 0, image=self._image, anchor="nw")
+                self.label_info.config(
+                    text=f"Mean: {np.mean(image):.2f}, "
+                    f"Min: {np.min(image):.2f}, "
+                    f"Max: {np.max(image):.2f}"
+                )
+                self.label_info.update()
+
             except queue.Empty:
                 pass
             self.after(10, self._get_image)
