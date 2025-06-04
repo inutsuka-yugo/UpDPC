@@ -1,7 +1,8 @@
+import json
 import os
 from os import listdir
-from os.path import basename, dirname, exists, isdir, isfile, join, splitext, abspath
-import json
+from os.path import abspath, basename, dirname, exists, isdir, isfile, join, splitext
+
 from natsort import natsorted
 
 
@@ -143,7 +144,7 @@ def list_tifs(dir_path, include=None, exclude=None, **kwargs):
     )
 
 
-def list_folder(dir_path):
+def list_folders(dir_path):
     """
     List folders in a directory.
     The folders are sorted in natural order.

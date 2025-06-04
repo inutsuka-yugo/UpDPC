@@ -1,10 +1,11 @@
 import sys
 from os import chdir
-from os.path import dirname, abspath
+from os.path import abspath, dirname
 
 sys.path.append(dirname(dirname(dirname(abspath(__file__)))))
-from updpc import *
 import siemens_star_analysis
+
+from updpc import *
 
 chdir(join(dirname(dirname(dirname(abspath(__file__)))), "data", "siemens_star"))
 
@@ -37,7 +38,7 @@ if __name__ == "__main__":
                 print("condition:", condition, "is not a valid directory.")
                 line_breaks(5)
                 continue
-            for img_dir in list_folder(join(root_dir, condition))[::1]:
+            for img_dir in list_folders(join(root_dir, condition))[::1]:
                 try:
                     wavelength = (
                         float(basename(img_dir).split("nm")[0].split("_")[-1]) / 1000
