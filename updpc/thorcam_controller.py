@@ -30,19 +30,18 @@ def thorcam_now():
     return datetime.datetime.now().strftime(THORCAM_TIMESTAMP_FORMAT)
 
 
-pytsi_tag_names = {
-    "32768": "SIGNIFICANT_BITS_INT",
-    "32769": "EXPOSURE_TIME_US",
-    "32779": "FRAME_NUMBER_INT",
-    "32782": "TIME_STAMP_RELATIVE_NS",
-}
-
-
 TAG_BITDEPTH = 32768
 TAG_EXPOSURE = 32776
 TAG_FRAME = 32779
 TAG_TIME = 32782
 NUMBER_OF_IMAGES = 40
+
+pytsi_tag_names = {
+    str(TAG_BITDEPTH): "SIGNIFICANT_BITS_INT",
+    str(TAG_EXPOSURE): "EXPOSURE_TIME_US",
+    str(TAG_FRAME): "FRAME_NUMBER_INT",
+    str(TAG_TIME): "TIME_STAMP_RELATIVE_NS",
+}
 
 
 def read_pytsi_metadata(path, frame_col="", ns_col=""):
